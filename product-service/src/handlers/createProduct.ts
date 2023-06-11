@@ -1,7 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument, GetCommand } from "@aws-sdk/lib-dynamodb";
 
-import { buildResponse /*uuidv4*/ } from "./libs/utils.js";
+import { buildResponse } from "./libs/utils.js";
+import { v4 as uuid } from "uuid";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocument.from(client);
@@ -20,7 +21,7 @@ export const handler = async (event: any) => {
       }
 
       const product = {
-        id: /*uuidv4()*/ "testId2",
+        id: uuid(),
         title,
         description,
         price,

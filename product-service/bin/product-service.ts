@@ -2,6 +2,7 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 
@@ -11,31 +12,28 @@ const stack = new cdk.Stack(app, "ProductServiceStack", {
   env: { region: "us-east-1" },
 });
 
-const getProductsList = new lambda.Function(stack, "GetProductsListLambda", {
+const getProductsList = new NodejsFunction(stack, "GetProductsListLambda", {
   runtime: lambda.Runtime.NODEJS_18_X,
   functionName: "getProductsList",
-  code: lambda.Code.fromAsset("src/handlers"),
-  handler: "getProductsList.handler",
+  entry: "src/handlers/getProductsList.ts",
   environment: {
     PRODUCT_AWS_REGION: "us-east-1",
   },
 });
 
-const getProductById = new lambda.Function(stack, "GetProductByIdLambda", {
+const getProductById = new NodejsFunction(stack, "GetProductByIdLambda", {
   runtime: lambda.Runtime.NODEJS_18_X,
   functionName: "getProductById",
-  code: lambda.Code.fromAsset("src/handlers"),
-  handler: "getProductById.handler",
+  entry: "src/handlers/getProductById.ts",
   environment: {
     PRODUCT_AWS_REGION: "us-east-1",
   },
 });
 
-const createProduct = new lambda.Function(stack, "CreateProductLambda", {
+const createProduct = new NodejsFunction(stack, "CreateProductLambda", {
   runtime: lambda.Runtime.NODEJS_18_X,
   functionName: "createProduct",
-  code: lambda.Code.fromAsset("src/handlers"),
-  handler: "createProduct.handler",
+  entry: "src/handlers/createProduct.ts",
   environment: {
     PRODUCT_AWS_REGION: "us-east-1",
   },

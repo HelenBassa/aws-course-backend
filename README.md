@@ -78,7 +78,7 @@ _FE: One product model as a result of BE models join (product and it's stock)_
 
 _NOTE: This setup means User cannot buy more than `product.count` (no more items in stock) - but this is future functionality on FE side._
 
-- [x] Integrate the `getProductsById` lambda to return via GET `/products/{productId}` request a single product from the database. Link - https://d1v4qmrdh4.execute-api.us-east-1.amazonaws.com/products/100
+- [x] Integrate the `getProductsById` lambda to return via GET `/products/{productId}` request a single product from the database. Link - https://d1v4qmrdh4.execute-api.us-east-1.amazonaws.com/products/8dc6d3e1-2d52-4d43-bef6-2931d717f6c8
 
 ### Task 4.3
 
