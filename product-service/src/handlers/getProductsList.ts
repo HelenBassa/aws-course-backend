@@ -6,9 +6,9 @@ import { buildResponse } from "./libs/utils.js";
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
-export const handler = async () => {
+export const handler = async (event: any) => {
   try {
-    console.log("Hello from getProductsList");
+    console.log("Hello from getProductsList", event);
 
     const scanProduct = new ScanCommand({
       TableName: "Product",

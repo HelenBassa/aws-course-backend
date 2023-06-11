@@ -31,6 +31,16 @@ const getProductById = new lambda.Function(stack, "GetProductByIdLambda", {
   },
 });
 
+const createProduct = new lambda.Function(stack, "CreateProductLambda", {
+  runtime: lambda.Runtime.NODEJS_18_X,
+  functionName: "createProduct",
+  code: lambda.Code.fromAsset("src/handlers"),
+  handler: "createProduct.handler",
+  environment: {
+    PRODUCT_AWS_REGION: "us-east-1",
+  },
+});
+
 const api = new apiGateway.HttpApi(stack, "ProductApi", {
   corsPreflight: {
     allowHeaders: ["*"],
@@ -55,4 +65,13 @@ api.addRoutes({
   ),
   path: "/products/{productId}",
   methods: [apiGateway.HttpMethod.GET],
+});
+
+api.addRoutes({
+  integration: new HttpLambdaIntegration(
+    "CreateProductIntegration",
+    createProduct
+  ),
+  path: "/products",
+  methods: [apiGateway.HttpMethod.POST],
 });

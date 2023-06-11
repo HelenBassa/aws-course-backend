@@ -3,8 +3,7 @@
 ### Link to Product Service API - https://d1v4qmrdh4.execute-api.us-east-1.amazonaws.com
 Add `/products` or `/products/{productId}` in the end. For example:
 `/products` - https://d1v4qmrdh4.execute-api.us-east-1.amazonaws.com/products
-`/products/{productId}` - https://d1v4qmrdh4.execute-api.us-east-1.amazonaws.com/products/100 , (_where productId from 100 to 600 
-in increments of 100_)
+`/products/{productId}` - https://d1v4qmrdh4.execute-api.us-east-1.amazonaws.com/products/8dc6d3e1-2d52-4d43-bef6-2931d717f6c8 (for example).
 
 - [x]  Link to FE PR (YOUR OWN REPOSITORY) - https://github.com/HelenBassa/nodejs-aws-shop-react/pull/3
 - [x] **Link to Frontend app - https://d202mox6ze7nec.cloudfront.net/**
@@ -83,16 +82,16 @@ _NOTE: This setup means User cannot buy more than `product.count` (no more items
 
 ### Task 4.3
 
-- [ ] Create a lambda function called `createProduct` under the Product Service which will be triggered by the HTTP POST method.
-- [ ] The requested URL should be `/products`.
-- [ ] Implement its logic so it will be creating a new item in a Products table.
-- [ ] Save the URL (API Gateway URL) to execute the implemented lambda functions for later - you'll need to provide it in the PR (e.g in PR's description) when submitting the task.
+- [x] Create a lambda function called `createProduct` under the Product Service which will be triggered by the HTTP POST method.
+- [x] The requested URL should be `/products`.
+- [x] Implement its logic so it will be creating a new item in a Products table.
+- [x] Save the URL (API Gateway URL) to execute the implemented lambda functions for later - you'll need to provide it in the PR (e.g in PR's description) when submitting the task.
 
 ### Task 4.4
 
-- [ ] Commit all your work to separate branch (e.g. `task-4` from the latest `master`) in BE (backend) and if needed in FE (frontend) repositories.
-- [ ] Create a pull request to the `master` branch.
-- [ ] Submit link to the pull request to Crosscheck page in [RS App](https://app.rs.school).
+- [x] Commit all your work to separate branch (e.g. `task-4` from the latest `master`) in BE (backend) and if needed in FE (frontend) repositories.
+- [x] Create a pull request to the `master` branch.
+- [x] Submit link to the pull request to Crosscheck page in [RS App](https://app.rs.school).
 
 ## Evaluation criteria (70 points for covering all criteria)
 
@@ -102,16 +101,16 @@ Reviewers should verify the lambda functions by invoking them through provided U
 
 - [x] Task 4.1 is implemented
 - [x] Task 4.2 is implemented lambda links are provided and returns data
-- [ ] Task 4.3 is implemented lambda links are provided and products is stored in DB (call Task 4.2 to see the product)
+- [x] Task 4.3 is implemented lambda links are provided and products is stored in DB (call Task 4.2 to see the product)
 - [x] Your own Frontend application is integrated with Product Service (`/products` API) and products from Product Service are represented on Frontend. Link to a working Frontend application is provided for cross-check reviewer - https://d202mox6ze7nec.cloudfront.net/
 
 ## Additional (optional) tasks
 
 ---
 
-- [ ] **+6** **(All languages)** - POST `/products` lambda functions returns error 400 status code if product data is invalid
+- [x] **+6** **(All languages)** - POST `/products` lambda functions returns error 400 status code if product data is invalid
 - [x] **+6** **(All languages)** - All lambdas return error 500 status code on any error (DB connection, any unhandled error in code)
-- [ ] **+6** **(All languages)** - All lambdas do `console.log` for each incoming requests and their arguments
+- [x] **+6** **(All languages)** - All lambdas do `console.log` for each incoming requests and their arguments
 - [ ] **+6** **(All languages)** - Use RDS instance instead of DynamoDB tables. **Do not commit your environment variables to github!**
 - [ ] **+6** **(All languages)** - Transaction based creation of product (in case stock creation is failed then related to this stock product is not created and not ready to be used by the end user and vice versa) (https://devcenter.kinvey.com/nodejs/tutorials/bl-transactional-support, https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
 
