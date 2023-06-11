@@ -1,12 +1,12 @@
 {
   "name": "product-service",
   "version": "0.1.0",
-
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "build:deploy": "npm run build && cdk deploy"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
@@ -21,7 +21,10 @@
   "dependencies": {
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.82.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.82.0-alpha.0",
+    "@aws-sdk/client-dynamodb": "^3.350.0",
+    "@aws-sdk/lib-dynamodb": "^3.350.0",
     "aws-cdk-lib": "2.82.0",
+    "aws-sdk": "^2.1395.0",
     "constructs": "^10.0.0",
     "lodash": "^4.17.21",
     "source-map-support": "^0.5.21"

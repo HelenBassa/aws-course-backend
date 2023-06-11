@@ -1,12 +1,41 @@
-import { buildResponse } from "./libs/utils.js";
-import { PRODUCTS } from "./constants.js";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
-export const handler = async (event: any) => {
+import { buildResponse } from "./libs/utils.js";
+
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
+
+export const handler = async () => {
   try {
-    console.log("Hello from getProductsList", event);
+    console.log("Hello from getProductsList");
+
+    const scanProduct = new ScanCommand({
+      TableName: "Product",
+    });
+
+    const scanStock = new ScanCommand({
+      TableName: "Stock",
+    });
+
+    const responseProduct = await docClient.send(scanProduct);
+    const responseStock = await docClient.send(scanStock);
+
+    const stocksHashMap = responseStock.Items?.reduce(
+      (acc, cur) => ({
+        ...acc,
+        [cur.product_id]: cur.count,
+      }),
+      {}
+    );
+
+    const productsWithCount = responseProduct.Items?.map((product) => ({
+      ...product,
+      count: stocksHashMap![product.id] || 0,
+    }));
 
     return buildResponse(200, {
-      products: PRODUCTS,
+      products: productsWithCount,
     });
   } catch (err: any) {
     return buildResponse(500, {
