@@ -19,6 +19,8 @@ export const handler = async (event: S3Event) => {
 
   const key = records[0].s3.object.key;
   const bucketName = event.Records[0].s3.bucket.name;
+  console.log({ key });
+  console.log({ bucketName });
 
   const params = {
     Bucket: bucketName,
@@ -31,6 +33,7 @@ export const handler = async (event: S3Event) => {
   const deleteCommand = new DeleteObjectCommand(params);
 
   const parsedKey = key.replace("uploaded", "parsed");
+  console.log({ parsedKey });
 
   const copyCommand = new CopyObjectCommand({
     Bucket: bucketName,
@@ -40,6 +43,7 @@ export const handler = async (event: S3Event) => {
 
   try {
     const file = await client.send(getCommand);
+    console.log({ file });
     const readStream = file.Body;
 
     if (!(readStream instanceof Readable)) {

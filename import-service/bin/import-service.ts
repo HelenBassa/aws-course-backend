@@ -8,10 +8,12 @@ import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { config } from "dotenv";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 
 config();
 
-const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME } = process.env;
+const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME, AWS_ACCOUNT_ID } =
+  process.env;
 
 const app = new cdk.App();
 
@@ -34,6 +36,12 @@ const bucket = new s3.Bucket(stack, "ImportBucket", {
   ],
 });
 
+const queue = sqs.Queue.fromQueueArn(
+  stack,
+  "ImportFileQueue",
+  `arn:aws:sqs:${IMPORT_SERVICE_AWS_REGION}:${AWS_ACCOUNT_ID}:import-file-queue` // <-- check arn
+);
+
 const importProductsFile = new NodejsFunction(
   stack,
   "ImportProductsFileLambda",
@@ -44,6 +52,7 @@ const importProductsFile = new NodejsFunction(
     environment: {
       IMPORT_SERVICE_AWS_REGION: IMPORT_SERVICE_AWS_REGION!,
       S3_BUCKET_NAME: S3_BUCKET_NAME!,
+      IMPORT_SQS_URL: queue.queueUrl,
     },
   }
 );
@@ -57,10 +66,13 @@ const importFileParser = new NodejsFunction(stack, "ImportFileParserLambda", {
   environment: {
     IMPORT_SERVICE_AWS_REGION: IMPORT_SERVICE_AWS_REGION!,
     S3_BUCKET_NAME: S3_BUCKET_NAME!,
+    IMPORT_SQS_URL: queue.queueUrl,
   },
 });
 
-bucket.grantReadWrite(importFileParser);
+queue.grantSendMessages(importFileParser);
+
+bucket.grantReadWrite(importFileParser); // <-- check if it's needs
 
 bucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,
