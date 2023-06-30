@@ -2,13 +2,14 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
-import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as sqs from "aws-cdk-lib/aws-sqs";
-import { config } from "dotenv";
+import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import { config } from "dotenv";
 
 config();
 
@@ -20,12 +21,12 @@ const stack = new cdk.Stack(app, "ProductServiceStack", {
   env: { region: PRODUCT_AWS_REGION },
 });
 
-const importProductTopic = new sns.Topic(stack, "ImportProductTopic", {
-  topicName: "import-products-topic",
-});
-
 const importQueue = new sqs.Queue(stack, "ImportQueue", {
   queueName: "import-file-queue",
+});
+
+const importProductTopic = new sns.Topic(stack, "ImportProductTopic", {
+  topicName: "import-products-topic",
 });
 
 new sns.Subscription(stack, "BigStockSubcription", {
@@ -43,6 +44,41 @@ new sns.Subscription(stack, "BigStockSubcription", {
 //   },
 // });
 
+const productTable = dynamodb.Table.fromTableName(
+  stack,
+  "ProductTable",
+  "Product"
+);
+const stockTable = dynamodb.Table.fromTableName(stack, "StockTable", "Stock");
+
+const environment = {
+  PRODUCT_AWS_REGION: PRODUCT_AWS_REGION!,
+  TABLE_NAME_PRODUCT: productTable.tableName,
+  TABLE_NAME_STOCK: stockTable.tableName,
+  SNS_ARN: importProductTopic.topicArn,
+};
+
+const getProductsList = new NodejsFunction(stack, "GetProductsListLambda", {
+  runtime: lambda.Runtime.NODEJS_18_X,
+  functionName: "getProductsList",
+  entry: "src/handlers/getProductsList.ts",
+  environment,
+});
+
+const getProductById = new NodejsFunction(stack, "GetProductByIdLambda", {
+  runtime: lambda.Runtime.NODEJS_18_X,
+  functionName: "getProductById",
+  entry: "src/handlers/getProductById.ts",
+  environment,
+});
+
+const createProduct = new NodejsFunction(stack, "CreateProductLambda", {
+  runtime: lambda.Runtime.NODEJS_18_X,
+  functionName: "createProduct",
+  entry: "src/handlers/createProduct.ts",
+  environment,
+});
+
 const catalogBatchProcess = new NodejsFunction(
   stack,
   "CatalogBatchProcessLambda",
@@ -50,6 +86,7 @@ const catalogBatchProcess = new NodejsFunction(
     runtime: lambda.Runtime.NODEJS_18_X,
     functionName: "catalogBatchProcess",
     entry: "src/handlers/catalogBatchProcess.ts",
+    environment,
   }
 );
 
@@ -58,32 +95,14 @@ catalogBatchProcess.addEventSource(
   new SqsEventSource(importQueue, { batchSize: 5 })
 );
 
-const getProductsList = new NodejsFunction(stack, "GetProductsListLambda", {
-  runtime: lambda.Runtime.NODEJS_18_X,
-  functionName: "getProductsList",
-  entry: "src/handlers/getProductsList.ts",
-  environment: {
-    PRODUCT_AWS_REGION: PRODUCT_AWS_REGION!,
-  },
-});
-
-const getProductById = new NodejsFunction(stack, "GetProductByIdLambda", {
-  runtime: lambda.Runtime.NODEJS_18_X,
-  functionName: "getProductById",
-  entry: "src/handlers/getProductById.ts",
-  environment: {
-    PRODUCT_AWS_REGION: PRODUCT_AWS_REGION!,
-  },
-});
-
-const createProduct = new NodejsFunction(stack, "CreateProductLambda", {
-  runtime: lambda.Runtime.NODEJS_18_X,
-  functionName: "createProduct",
-  entry: "src/handlers/createProduct.ts",
-  environment: {
-    PRODUCT_AWS_REGION: PRODUCT_AWS_REGION!,
-  },
-});
+productTable.grantReadData(getProductsList);
+stockTable.grantReadData(getProductsList);
+productTable.grantReadData(getProductById);
+stockTable.grantReadData(getProductById);
+productTable.grantWriteData(createProduct);
+stockTable.grantWriteData(createProduct);
+productTable.grantWriteData(catalogBatchProcess);
+stockTable.grantWriteData(catalogBatchProcess);
 
 const api = new apiGateway.HttpApi(stack, "ProductApi", {
   corsPreflight: {

@@ -5,29 +5,29 @@ import { get } from "lodash";
 import { snsClient } from "./libs/utils";
 import { v4 as uuidv4 } from "uuid";
 
-export const handler = async (event: any) => {
-  console.log("sqs event", event);
-  const records = get(event, "Records", []);
-  console.log("records", records);
+const { IMPORT_PRODUCTS_TOPIC_ARN } = process.env;
 
+export const handler = async (event: any) => {
   try {
+    console.log("sqs event", event);
+    const records = get(event, "Records", []);
+    console.log("records", records);
+
     for (const record of records) {
       const { description, title, price, count } = JSON.parse(record.body);
       const id = uuidv4();
       const product = { id, description, title, price: Number(price) };
       const stock = { product_id: id, count: Number(count) };
-      const result = await createProduct(event);
+      const newProduct = { ...product, ...stock };
+      console.log({ newProduct });
 
-      // const newProductData = await createProduct(JSON.parse(record.body));
-      const newProductData = await createProduct(record);
-
-      console.log({ newProductData });
+      const result = await createProduct(record);
+      console.log({ result });
 
       await snsClient.send(
         new PublishCommand({
           Subject: "New Products Added to Catalog",
-          // Message: JSON.stringify(newProductData),
-          TopicArn: process.env.IMPORT_PRODUCTS_TOPIC_ARN, /// <--- set arn  in .env file
+          TopicArn: IMPORT_PRODUCTS_TOPIC_ARN,
           Message: JSON.stringify({
             id: id,
             description: description,
@@ -35,12 +35,6 @@ export const handler = async (event: any) => {
             price: price,
             count: count,
           }),
-          // MessageAttributes: {
-          //   count: {
-          //     DataType: "Number",
-          //     StringValue: newProductData.count, /// <-- what???
-          //   },
-          // },
         })
       );
     }
