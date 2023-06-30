@@ -39,7 +39,7 @@ const bucket = new s3.Bucket(stack, "ImportBucket", {
 const queue = sqs.Queue.fromQueueArn(
   stack,
   "ImportFileQueue",
-  "arn:aws:sqs:us-east-1:533953855282:import-file-queue"
+  IMPORT_PRODUCTS_TOPIC_ARN!
 );
 
 const importProductsFile = new NodejsFunction(

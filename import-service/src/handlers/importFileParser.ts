@@ -27,7 +27,7 @@ export const handler = async (event: S3Event) => {
   };
 
   const client = new S3Client({ region: IMPORT_SERVICE_AWS_REGION });
-  const sqsClient = new SQSClient({ region: "us-east-1" });
+  const sqsClient = new SQSClient({ region: IMPORT_SERVICE_AWS_REGION });
 
   const getCommand = new GetObjectCommand(params);
   const deleteCommand = new DeleteObjectCommand(params);
@@ -62,7 +62,7 @@ export const handler = async (event: S3Event) => {
 
             await sqsClient.send(
               new SendMessageCommand({
-                QueueUrl: SQS_URL ?? "",
+                QueueUrl: SQS_URL,
                 MessageBody: JSON.stringify(data),
               })
             );
