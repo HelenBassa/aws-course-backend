@@ -3,15 +3,17 @@ import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { config } from "dotenv";
 
 config();
 
-const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME } = process.env;
+const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME, IMPORT_PRODUCTS_TOPIC_ARN } =
+  process.env;
 
 const app = new cdk.App();
 
@@ -34,6 +36,12 @@ const bucket = new s3.Bucket(stack, "ImportBucket", {
   ],
 });
 
+const queue = sqs.Queue.fromQueueArn(
+  stack,
+  "ImportFileQueue",
+  IMPORT_PRODUCTS_TOPIC_ARN!
+);
+
 const importProductsFile = new NodejsFunction(
   stack,
   "ImportProductsFileLambda",
@@ -44,11 +52,10 @@ const importProductsFile = new NodejsFunction(
     environment: {
       IMPORT_SERVICE_AWS_REGION: IMPORT_SERVICE_AWS_REGION!,
       S3_BUCKET_NAME: S3_BUCKET_NAME!,
+      IMPORT_SQS_URL: queue.queueUrl,
     },
   }
 );
-
-bucket.grantReadWrite(importProductsFile);
 
 const importFileParser = new NodejsFunction(stack, "ImportFileParserLambda", {
   runtime: lambda.Runtime.NODEJS_18_X,
@@ -57,9 +64,13 @@ const importFileParser = new NodejsFunction(stack, "ImportFileParserLambda", {
   environment: {
     IMPORT_SERVICE_AWS_REGION: IMPORT_SERVICE_AWS_REGION!,
     S3_BUCKET_NAME: S3_BUCKET_NAME!,
+    IMPORT_SQS_URL: queue.queueUrl,
   },
 });
 
+queue.grantSendMessages(importFileParser);
+
+bucket.grantReadWrite(importProductsFile);
 bucket.grantReadWrite(importFileParser);
 
 bucket.addEventNotification(
