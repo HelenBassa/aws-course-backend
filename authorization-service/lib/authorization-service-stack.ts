@@ -1,19 +1,24 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import { Construct } from 'constructs';
+import * as cdk from "aws-cdk-lib";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { config } from "dotenv";
 
-export class AuthorizationServiceStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
-    super(scope, id, props);
+config();
 
-    const queue = new sqs.Queue(this, 'AuthorizationServiceQueue', {
-      visibilityTimeout: Duration.seconds(300)
-    });
+const { AUTH_SERVICE_AWS_REGION } = process.env;
 
-    const topic = new sns.Topic(this, 'AuthorizationServiceTopic');
+const app = new cdk.App();
 
-    topic.addSubscription(new subs.SqsSubscription(queue));
-  }
-}
+const stack = new cdk.Stack(app, "AuthorizationServiceStack", {
+  env: { region: AUTH_SERVICE_AWS_REGION },
+});
+
+const basicAuthorizer = new NodejsFunction(stack, "BasicAuthorizerLambda", {
+  runtime: lambda.Runtime.NODEJS_18_X,
+  functionName: "basicAuthorizer",
+  entry: "src/handlers/basicAuthorizer.ts",
+});
+
+new cdk.CfnOutput(stack, "BasicAuthorizerLambdaArn", {
+  value: basicAuthorizer.functionArn,
+});
