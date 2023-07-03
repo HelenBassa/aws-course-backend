@@ -3,17 +3,28 @@ import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
+import * as apiGW from "aws-cdk-lib/aws-apigateway";
+import {
+  HttpLambdaAuthorizer,
+  HttpLambdaResponseType,
+} from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
 import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { config } from "dotenv";
+import { handler } from "../src/handlers/importFileParser";
 
 config();
 
-const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME, IMPORT_PRODUCTS_TOPIC_ARN } =
-  process.env;
+const {
+  IMPORT_SERVICE_AWS_REGION,
+  S3_BUCKET_NAME,
+  IMPORT_PRODUCTS_TOPIC_ARN,
+  AUTHORIZER_LAMBDA_NAME,
+  AUTHORIZER_LAMBDA_ARN,
+} = process.env;
 
 const app = new cdk.App();
 
@@ -70,6 +81,36 @@ const importFileParser = new NodejsFunction(stack, "ImportFileParserLambda", {
 
 queue.grantSendMessages(importFileParser);
 
+// const basicAuthorizer = lambda.Function.fromFunctionName(
+//   stack,
+//   "basicAuthorizerLambda",
+//   AUTHORIZER_LAMBDA_NAME!
+// );
+
+const basicAuthorizerLambda = lambda.Function.fromFunctionArn(
+  stack,
+  "BasicAuthorizerLambda",
+  AUTHORIZER_LAMBDA_ARN!
+);
+
+// const authorizer = new apiGW.TokenAuthorizer(stack, "ImportServiceAuthorizer", {
+//   handler: basicAuthorizer,
+// });
+const authorizer = new HttpLambdaAuthorizer(
+  "basicAuthorizer",
+  basicAuthorizerLambda,
+  {
+    responseTypes: [HttpLambdaResponseType.IAM],
+  }
+);
+
+new lambda.CfnPermission(stack, "AuthorizerInvoke", {
+  action: "lambda:InvokeFunction",
+  functionName: basicAuthorizerLambda.functionName,
+  principal: "apigateway.amazonaws.com",
+  // sourceArn: authorizer.authorizerArn,
+});
+
 bucket.grantReadWrite(importProductsFile);
 bucket.grantReadWrite(importFileParser);
 
@@ -87,6 +128,15 @@ const api = new apiGateway.HttpApi(stack, "ImportApi", {
   },
 });
 
+// api.addGatewayResponse("GatewayResponseUnauthorized", {
+//   type: apiGateway.ResponseType.UNAUTHORIZED,
+//   responseHeaders: {
+//     "Access-Control-Allow-Origin": "'*'",
+//     "Access-Control-Allow-Headers": "'*'",
+//     "Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE'",
+//     "Access-Control-Allow-Credentials": "'true'",
+//   },
+// });
 api.addRoutes({
   integration: new HttpLambdaIntegration(
     "ImportProductFileIntegration",
@@ -94,4 +144,9 @@ api.addRoutes({
   ),
   path: "/import",
   methods: [apiGateway.HttpMethod.GET],
+  authorizer,
 });
+
+// new cdk.CfnOutput(stack, "AuthorizerArn", {
+//   value: authorizer.authorizerArn,
+// });
