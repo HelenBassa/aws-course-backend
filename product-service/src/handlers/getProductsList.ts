@@ -1,16 +1,11 @@
-import { buildResponse } from "./libs/utils.js";
-import { PRODUCTS } from "./constants.js";
+import { buildResponse, getProductsData } from "./libs/utils.js";
 
-export const handler = async (event: any) => {
+export const handler = async () => {
   try {
-    console.log("Hello from getProductsList", event);
-
-    return buildResponse(200, {
-      products: PRODUCTS,
-    });
+    const products = await getProductsData();
+    return buildResponse(200, products);
   } catch (err: any) {
-    return buildResponse(500, {
-      message: err.message,
-    });
+    const { error, message } = err;
+    return buildResponse(error, { message });
   }
 };
