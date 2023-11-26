@@ -1,0 +1,64 @@
+{
+  "Product": [
+      {
+          "PutRequest": {
+              "Item": {
+                  "id": { "S": "4aa776f3-ca26-4220-ad14-349c0288d5e4" },
+                  "title": { "S": "Trek from DB" },
+                  "description": { "S": "Trek description from DB" },
+                  "price": { "N": "500" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "id": { "S": "57fa46ea-a402-4992-b58f-89e341e10da0" },
+                  "title": { "S": "Specialized from DB" },
+                  "description": { "S": "Specialized description from DB" },
+                  "price": { "N": "400" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "id": { "S": "8dc6d3e1-2d52-4d43-bef6-2931d717f6c8" },
+                  "title": { "S": "Cannondale from DB" },
+                  "description": { "S": "Cannondale description from DB" },
+                  "price": { "N": "300" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "id": { "S": "0cf2b887-d7eb-4185-954b-7ad4454ef814" },
+                  "title": { "S": "Santa Cruz from DB" },
+                  "description": { "S": "Santa Cruz description from DB" },
+                  "price": { "N": "200" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "id": { "S": "880b698b-cf90-4f04-bcb5-8796aff905f7" },
+                  "title": { "S": "Scott from DB" },
+                  "description": { "S": "Scott description from DB" },
+                  "price": { "N": "100" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "id": { "S": "7951b11f-d923-490d-9dde-c4c1773ad418" },
+                  "title": { "S": "Giant from DB" },
+                  "description": { "S": "Giant description from DB" },
+                  "price": { "N": "50" }
+              }
+          }
+      }
+  ]
+}

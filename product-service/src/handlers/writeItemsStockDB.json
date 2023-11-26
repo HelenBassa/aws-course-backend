@@ -1,0 +1,52 @@
+{
+  "Stock": [
+      {
+          "PutRequest": {
+              "Item": {
+                  "product_id": { "S": "4aa776f3-ca26-4220-ad14-349c0288d5e4" },
+                  "count": { "N": "36" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "product_id": { "S": "57fa46ea-a402-4992-b58f-89e341e10da0" },
+                  "count": { "N": "37" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "product_id": { "S": "8dc6d3e1-2d52-4d43-bef6-2931d717f6c8" },
+                  "count": { "N": "38" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "product_id": { "S": "0cf2b887-d7eb-4185-954b-7ad4454ef814" },
+                  "count": { "N": "39" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "product_id": { "S": "880b698b-cf90-4f04-bcb5-8796aff905f7" },
+                  "count": { "N": "40" }
+              }
+          }
+      },
+      {
+          "PutRequest": {
+              "Item": {
+                  "product_id": { "S": "7951b11f-d923-490d-9dde-c4c1773ad418" },
+                  "count": { "N": "41" }
+              }
+          }
+      }
+  ]
+}
