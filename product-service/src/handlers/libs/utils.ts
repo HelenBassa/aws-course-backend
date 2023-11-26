@@ -1,18 +1,15 @@
 import { get } from "http";
-import { SNSClient } from "@aws-sdk/client-sns";
+import data from "../data.json";
 
-import { config } from "dotenv";
-config();
-
-const { PRODUCT_AWS_REGION } = process.env;
+export const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Credentials": true,
+};
 
 export const buildResponse = (statusCode: any, body: any) => ({
   statusCode: statusCode,
-  headers: {
-    "Access-Control-Allow-Credentials": true,
-    "Access-Control-Allow-Origins": "*",
-    "Access-Control-Allow-Headers": "*",
-  },
+  headers: CORS_HEADERS,
   body: JSON.stringify(body),
 });
 
@@ -28,6 +25,11 @@ export const checkBodyParameters = (requiredParameters: any, data: any) => {
   });
 };
 
-export const snsClient = new SNSClient({
-  region: PRODUCT_AWS_REGION,
-});
+export const getProductsData = () => Promise.resolve(data);
+export const getProductByIdData = (id: string) => {
+  const product = data.find((p) => p.id === id);
+  if (product) {
+    return Promise.resolve(product);
+  }
+  return Promise.reject({ error: 404, message: "Product not found!" });
+};
