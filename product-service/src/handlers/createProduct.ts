@@ -32,40 +32,6 @@ export const handler = async (event: any) => {
         count,
       };
 
-      const ProductParams = {
-        TableName: "Product",
-        Item: {
-          id: product.id,
-          title: product.title,
-          description: product.description,
-          price: product.price,
-        },
-      };
-
-      const StockParams = {
-        TableName: "Stock",
-        Item: {
-          product_id: product.id,
-          count: product.count,
-        },
-      };
-
-      // docClient.put(StockParams, function (err: any, data: any) {
-      //   if (err) {
-      //     console.log("Error Stock", err);
-      //   } else {
-      //     console.log("Success Stock", data);
-      //   }
-      // });
-
-      // docClient.put(ProductParams, function (err: any, data: any) {
-      //   if (err) {
-      //     console.log("Error Product", err);
-      //   } else {
-      //     console.log("Success Product", data);
-      //   }
-      // });
-
       await docClient.send(
         new TransactWriteCommand({
           TransactItems: [

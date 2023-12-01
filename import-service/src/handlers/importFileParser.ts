@@ -48,7 +48,6 @@ export const handler = async (event: S3Event) => {
 
     await new Promise((resolve) => {
       readStream
-        // .pipe(new PassThrough())
         .pipe(csv())
         .on("data", (data) => console.log(data))
         .on("end", async () => {

@@ -14,6 +14,7 @@ config();
 const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME } = process.env;
 
 const app = new cdk.App();
+
 const stack = new cdk.Stack(app, "ImportServiceStack", {
   env: { region: IMPORT_SERVICE_AWS_REGION! },
 });
