@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-s3";
 
 import { Readable } from "stream";
-import csv from "csv-parser";
+import csv = require("csv-parser");
 
 import { buildResponse } from "../handlers/libs/utils";
 
@@ -49,7 +49,7 @@ export const handler = async (event: S3Event) => {
     await new Promise((resolve) => {
       readStream
         .pipe(csv())
-        .on("data", (data) => console.log(data))
+        .on("data", (data) => console.log("Data:", data))
         .on("end", async () => {
           console.log("Finished reading");
           const copyRes = await client.send(copyCommand);
