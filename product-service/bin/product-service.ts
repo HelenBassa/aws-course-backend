@@ -50,9 +50,9 @@ new sns.Subscription(stack, "createProductTopicSubscription", {
 new sns.Subscription(stack, "createProductTopicLowCountSubscription", {
   topic: topic,
   protocol: sns.SubscriptionProtocol.EMAIL,
-  endpoint: ADDITIONAL_TOPIC_EMAIL as string, // <-- change email
+  endpoint: ADDITIONAL_TOPIC_EMAIL as string,
   filterPolicy: {
-    count: sns.SubscriptionFilter.numericFilter({ lessThan: 5 }),
+    count: sns.SubscriptionFilter.numericFilter({ greaterThan: 5 }),
   },
 });
 
