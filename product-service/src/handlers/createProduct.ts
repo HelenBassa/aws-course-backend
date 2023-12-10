@@ -32,24 +32,6 @@ export const handler = async (event: any) => {
         count,
       };
 
-      const ProductParams = {
-        TableName: "Product",
-        Item: {
-          id: product.id,
-          title: product.title,
-          description: product.description,
-          price: product.price,
-        },
-      };
-
-      const StockParams = {
-        TableName: "Stock",
-        Item: {
-          product_id: product.id,
-          count: product.count,
-        },
-      };
-
       await docClient.send(
         new TransactWriteCommand({
           TransactItems: [
