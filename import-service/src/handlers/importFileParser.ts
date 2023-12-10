@@ -52,6 +52,7 @@ export const handler = async (event: S3Event) => {
         .on("data", (data) => console.log("Data:", data))
         .on("end", async () => {
           console.log("Finished reading");
+
           const copyRes = await client.send(copyCommand);
           console.log(copyRes, "Copied to /parsed");
           const deleteRes = await client.send(deleteCommand);
