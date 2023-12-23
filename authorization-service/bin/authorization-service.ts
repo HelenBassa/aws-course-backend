@@ -25,3 +25,4 @@ const basicAuthorizer = new NodejsFunction(stack, "basicAuthorizerLambda", {
   entry: "src/handlers/basicAuthorizer.ts",
   environment,
 });
+

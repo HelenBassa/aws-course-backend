@@ -95,6 +95,7 @@ export const handler = async (event: S3Event) => {
             sqsUrl: SQS_URL!,
           });
           console.log("Finished reading");
+
           const copyRes = await client.send(copyCommand);
           console.log(copyRes, "Copied to /parsed");
           const deleteRes = await client.send(deleteCommand);
