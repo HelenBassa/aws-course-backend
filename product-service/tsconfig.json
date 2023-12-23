@@ -24,8 +24,7 @@
       "./node_modules/@types"
     ],
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",

@@ -4,6 +4,7 @@ import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as apiGateway from "@aws-cdk/aws-apigatewayv2-alpha";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
@@ -11,7 +12,17 @@ import { config } from "dotenv";
 
 config();
 
-const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME } = process.env;
+const { IMPORT_SERVICE_AWS_REGION, S3_BUCKET_NAME, SQS_ARN } = process.env;
+
+console.log(
+  "IMPORT_SERVICE_AWS_REGION from import-service/import-service",
+  IMPORT_SERVICE_AWS_REGION
+);
+console.log(
+  "S3_BUCKET_NAME from import-service/import-service",
+  S3_BUCKET_NAME
+);
+console.log("SQS_ARN from import-service/import-service", SQS_ARN);
 
 const app = new cdk.App();
 
@@ -20,7 +31,7 @@ const stack = new cdk.Stack(app, "ImportServiceStack", {
 });
 
 const bucket = new s3.Bucket(stack, "ImportBucket", {
-  bucketName: S3_BUCKET_NAME,
+  bucketName: S3_BUCKET_NAME!,
   blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
   removalPolicy: cdk.RemovalPolicy.DESTROY,
   autoDeleteObjects: true,
@@ -34,6 +45,8 @@ const bucket = new s3.Bucket(stack, "ImportBucket", {
   ],
 });
 
+const queue = sqs.Queue.fromQueueArn(stack, "importFileQueue", SQS_ARN!);
+
 const importProductsFile = new NodejsFunction(
   stack,
   "ImportProductsFileLambda",
@@ -44,6 +57,7 @@ const importProductsFile = new NodejsFunction(
     environment: {
       IMPORT_SERVICE_AWS_REGION: IMPORT_SERVICE_AWS_REGION!,
       S3_BUCKET_NAME: S3_BUCKET_NAME!,
+      SQS_URL: queue.queueUrl,
     },
   }
 );
@@ -57,10 +71,13 @@ const importFileParser = new NodejsFunction(stack, "ImportFileParserLambda", {
   environment: {
     IMPORT_SERVICE_AWS_REGION: IMPORT_SERVICE_AWS_REGION!,
     S3_BUCKET_NAME: S3_BUCKET_NAME!,
+    SQS_URL: queue.queueUrl,
   },
 });
 
 bucket.grantReadWrite(importFileParser);
+bucket.grantDelete(importFileParser);
+queue.grantSendMessages(importFileParser);
 
 bucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,

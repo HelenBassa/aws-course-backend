@@ -8,6 +8,8 @@ import {
 import { buildResponse } from "./libs/utils.js";
 import { v4 as uuid } from "uuid";
 
+import { createProduct } from "../handlers/libs/dynamoDB";
+
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocument.from(client);
 
@@ -32,32 +34,35 @@ export const handler = async (event: any) => {
         count,
       };
 
-      await docClient.send(
-        new TransactWriteCommand({
-          TransactItems: [
-            {
-              Put: {
-                TableName: "Product",
-                Item: {
-                  id: product.id,
-                  title: product.title,
-                  description: product.description,
-                  price: product.price,
-                },
-              },
-            },
-            {
-              Put: {
-                TableName: "Stock",
-                Item: {
-                  product_id: product.id,
-                  count: product.count,
-                },
-              },
-            },
-          ],
-        })
-      );
+      const res = await createProduct(product);
+      console.log("res ->", res);
+
+      // await docClient.send(
+      //   new TransactWriteCommand({
+      //     TransactItems: [
+      //       {
+      //         Put: {
+      //           TableName: "Product",
+      //           Item: {
+      //             id: product.id,
+      //             title: product.title,
+      //             description: product.description,
+      //             price: product.price,
+      //           },
+      //         },
+      //       },
+      //       {
+      //         Put: {
+      //           TableName: "Stock",
+      //           Item: {
+      //             product_id: product.id,
+      //             count: product.count,
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   })
+      // );
 
       const command = new GetCommand({
         TableName: "Product",
