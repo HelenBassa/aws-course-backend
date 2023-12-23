@@ -1,10 +1,4 @@
 import { get } from "http";
-import { SNSClient } from "@aws-sdk/client-sns";
-
-import { config } from "dotenv";
-config();
-
-const { PRODUCT_AWS_REGION } = process.env;
 
 export const buildResponse = (statusCode: any, body: any) => ({
   statusCode: statusCode,
@@ -27,7 +21,3 @@ export const checkBodyParameters = (requiredParameters: any, data: any) => {
     return true;
   });
 };
-
-export const snsClient = new SNSClient({
-  region: "us-east-1",
-});
